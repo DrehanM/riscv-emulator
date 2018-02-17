@@ -223,33 +223,38 @@ void write_branch(Instruction instruction) {
 }
 
 void print_lui(Instruction instruction) {
-    /* YOUR CODE HERE */
+    fprintf(stdout, LUI_FORMAT, instruction.utype.rd, instruction.utype.imm);
 }
 
 void print_jal(Instruction instruction) {
-    /* YOUR CODE HERE */
+    fprintf(stdout, JAL_FORMAT, instruction.ujtype.rd, get_jump_offset(instruction));
 }
 
 void print_ecall(Instruction instruction) {
-    /* YOUR CODE HERE */
+    fprintf(stdout, ECALL_FORMAT);
 }
 
 void print_rtype(char *name, Instruction instruction) {
-    /* YOUR CODE HERE */
+    fprintf(stdout, RTYPE_FORMAT, name, instruction.rtype.rd, instruction.rtype.rs1, instruction.rtype.rs2);
 }
 
 void print_itype_except_load(char *name, Instruction instruction, int imm) {
-    /* YOUR CODE HERE */
+    int extended_imm = sign_extend_number(imm, 12);
+    fprintf(stdout, ITYPE_FORMAT, name, instruction.itype.rd, instruction.itype.rs1, extended_imm);
 }
 
 void print_load(char *name, Instruction instruction) {
-    /* YOUR CODE HERE */
+    fprintf(stdout, MEM_FORMAT, name, instruction.itype.rd, instruction.itype.imm, instruction.itype.rs1);
 }
 
 void print_store(char *name, Instruction instruction) {
-    /* YOUR CODE HERE */
+    fprintf(stdout, MEM_FORMAT, name, instruction.stype.rs2, get_store_offset(instruction), instruction.stype.rs1);
 }
 
 void print_branch(char *name, Instruction instruction) {
-    /* YOUR CODE HERE */
+    fprintf(stdout, BRANCH_FORMAT, name, instruction.sbtype.rs1, instruction.sbtype.rs2, get_branch_offset(instruction));
+
+
+
+
 }

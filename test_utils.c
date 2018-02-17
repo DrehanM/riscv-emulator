@@ -70,6 +70,7 @@ void test_sign_extend_number() {
     CU_ASSERT_EQUAL(sign_extend_number(0x1234, 13), 0xFFFFF234);
     CU_ASSERT_EQUAL(sign_extend_number(0x0,  1), 0);
     CU_ASSERT_EQUAL(sign_extend_number(0x1, 1), 0xFFFFFFFF);
+    CU_ASSERT_EQUAL(sign_extend_number(0xFFFFFF08, 8),  0x08);
 }
 
 void test_parse_instruction_rtype() {
