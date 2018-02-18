@@ -48,17 +48,25 @@ void execute_instruction(uint32_t instruction_bits, Processor *processor,Byte *m
 }
 
 void execute_rtype(Instruction instruction, Processor *processor) {
+    int rd = instruction.rtype.rd;
+    int rs1 = instruction.rtype.rs1;
+    int rs2 = instruction.rtype.rs2;
+    int32_t valSRA;
+    uint64_t prod64;
     switch (instruction.rtype.funct3){
         case 0x0:
             switch (instruction.rtype.funct7) {
                 case 0x0:
-                    // Add
+                    // ADD
+                    processor->R[rd] = processor->R[rs1] + processor->R[rs2];
                     break;
                 case 0x1:
-                    // Mul 
+                    // MUL
+                    processor->R[rd] = processor->R[rs1] * processor->R[rs2];
                     break;
                 case 0x20:
-                    // Sub
+                    // SUB
+                    processor->R[rd] = processor->R[rs1] - processor->R[rs2];
                     break;
                 default:
                     handle_invalid_instruction(instruction);
@@ -70,22 +78,27 @@ void execute_rtype(Instruction instruction, Processor *processor) {
             switch (instruction.rtype.funct7) {
                 case 0x0:
                     // SLL
+                    processor->R[rd] = processor->R[rs1] << processor->R[rs2];
                     break;
                 case 0x1:
-                    // MULH
+                    prod64 = ((processor->R[rs1] * processor->R[rs2]) & 0xFFFFFFFF00000000) >> 16;
+                    processor->R[rd] = prod64;
                     break;
             }
             break;
         case 0x2:
             // SLT
+            processor->R[rd] = processor->R[rs1] < processor->R[rs2];
             break;
         case 0x4:
             switch (instruction.rtype.funct7) {
                 case 0x0:
                     // XOR
+                    processor->R[rd] = processor->R[rs1] ^ processor->R[rs2];
                     break;
                 case 0x1:
                     // DIV
+                    processor->R[rd] = processor->R[rs1] / processor->R[rs2];
                     break;
                 default:
                     handle_invalid_instruction(instruction);
@@ -96,10 +109,14 @@ void execute_rtype(Instruction instruction, Processor *processor) {
         case 0x5:
             switch (instruction.rtype.funct7) {
                 case 0x0:
-                // SRL      
+                    // SRL      
+                    processor->R[rd] = processor->R[rs1] >> processor->R[rs2];
                     break;
                 case 0x20:
                     // SRA
+                    valSRA = processor->R[rs1];
+                    valSRA = valSRA >> processor->R[rs2];
+                    processor->R[rd] = valSRA; //possibly will change rd to signed word
                     break;
                 default:
                     handle_invalid_instruction(instruction);
@@ -111,9 +128,11 @@ void execute_rtype(Instruction instruction, Processor *processor) {
             switch (instruction.rtype.funct7) {
                 case 0x0:
                     // OR
+                     processor->R[rd] = processor->R[rs1] | processor->R[rs2];
                     break;
                 case 0x1:
                     // REM
+                     processor->R[rd] = processor->R[rs1] % processor->R[rs2];
                     break;
                 default:
                     handle_invalid_instruction(instruction);
@@ -123,6 +142,7 @@ void execute_rtype(Instruction instruction, Processor *processor) {
             break;
         case 0x7:
             // AND
+            processor->R[rd] = processor->R[rs1] & processor->R[rs2];
             break;
         default:
             handle_invalid_instruction(instruction);
