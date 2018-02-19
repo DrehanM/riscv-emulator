@@ -150,7 +150,8 @@ void execute_rtype(Instruction instruction, Processor *processor) {
 void execute_itype_except_load(Instruction instruction, Processor *processor) {
     int rd = instruction.itype.rd;
     int rs1 = processor->R[instruction.itype.rs1];
-    int imm = instruction.itype.imm;
+    int imm = sign_extend_number(instruction.itype.imm, 12);
+    int shift0p;
     switch (instruction.itype.funct3) {
         case 0x0:
             // ADDI
@@ -169,16 +170,21 @@ void execute_itype_except_load(Instruction instruction, Processor *processor) {
             processor->R[rd] = rs1 ^ imm;
             break;
         case 0x5:
-            switch (instruction.itype.funct7) {
-                case 0x00:
+            shift0p = instruction.itype.imm >> 10;
+            switch (shift0p) {
+                case 0x0:
                     //SRLI
-                    processor->R[rd] = rs1 >> imm;
+                    processor->R[rd] = rs1 >> (instruction.itype.imm & 0x1F);
                     break;
-                case 0x20:
+                case 0x1:
                     //SRAI
-                    processor->R[rd] = (Word) ((sWord) rs1 >> imm);
+                    processor->R[rd] = (Word) ((sWord) rs1 >> (instruction.itype.imm & 0x1F));
                     break;
+                default:
+                handle_invalid_instruction(instruction);
+                break;
             }
+            break;
         case 0x6:
             // ORI
             processor->R[rd] = rs1 | imm;
@@ -222,8 +228,8 @@ void execute_ecall(Processor *p, Byte *memory) {
 }
 
 void execute_branch(Instruction instruction, Processor *processor) {
-    int rs1 = instruction.sbtype.rs1;
-    int rs2 = instruction.sbtype.rs2;
+    int rs1 = processor->R[instruction.sbtype.rs1];
+    int rs2 = processor->R[instruction.sbtype.rs2];
     int offset = get_branch_offset(instruction);
     switch (instruction.sbtype.funct3) {
         case 0x0:
@@ -248,19 +254,19 @@ void execute_branch(Instruction instruction, Processor *processor) {
 void execute_load(Instruction instruction, Processor *processor, Byte *memory) {
     int rd = instruction.itype.rd;
     int rs1 = processor->R[instruction.itype.rs1];
-    int offset = instruction.itype.imm;
+    int offset = sign_extend_number(instruction.itype.imm, 12);
     switch (instruction.itype.funct3) {
         case 0x0:
             // LB
-            processor->R[rd] = sign_extend_number(load(memory, rs1 + offset, LENGTH_BYTE));
+            processor->R[rd] = sign_extend_number(load(memory, rs1 + offset, LENGTH_BYTE), 8);
             break;
         case 0x1:
             // LH
-            processor->R[rd] = sign_extend_number(load(memory, rs1 + offset, LENGTH_HALF_WORD));
+            processor->R[rd] = sign_extend_number(load(memory, rs1 + offset, LENGTH_HALF_WORD), 16);
             break;
         case 0x2:
             // LW
-            processor->R[rd] = sign_extend_number(load(memory, rs1 + offset, LENGTH_WORD));
+            processor->R[rd] = load(memory, rs1 + offset, LENGTH_WORD);
             break;
         default:
             handle_invalid_instruction(instruction);
@@ -269,8 +275,8 @@ void execute_load(Instruction instruction, Processor *processor, Byte *memory) {
 }
 
 void execute_store(Instruction instruction, Processor *processor, Byte *memory) {
-    int rs1 = processor->R[instruction.itype.rs1];
-    int rs2 = processor->R[instruction.itype.rs2];
+    int rs1 = processor->R[instruction.stype.rs1];
+    int rs2 = processor->R[instruction.stype.rs2];
     int offset = get_store_offset(instruction);
     switch (instruction.stype.funct3) {
         case 0x0:
@@ -293,7 +299,7 @@ void execute_store(Instruction instruction, Processor *processor, Byte *memory) 
 }
 
 void execute_jal(Instruction instruction, Processor *processor) {
-    processor->R[instruction.ujtype.rd] = processor->PC;
+    processor->R[instruction.ujtype.rd] = processor->PC - 4;
     processor->PC += get_jump_offset(instruction) - 4;
 }
 
