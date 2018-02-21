@@ -52,6 +52,7 @@ void execute_rtype(Instruction instruction, Processor *processor) {
     int rd = instruction.rtype.rd;
     int rs1 = processor->R[instruction.rtype.rs1];
     int rs2 = processor->R[instruction.rtype.rs2];
+
     switch (instruction.rtype.funct3){
         case 0x0:
             switch (instruction.rtype.funct7) {
@@ -77,9 +78,10 @@ void execute_rtype(Instruction instruction, Processor *processor) {
             switch (instruction.rtype.funct7) {
                 case 0x0:
                     // SLL
-                    processor->R[rd] = rs1 << rs2;
+                    processor->R[rd] = rs1 << (rs2 & 0x1F);
                     break;
                 case 0x1:
+                    // MULH
                     processor->R[rd] = (Word) ((Double) ((rs1 * rs2) & 0xFFFFFFFF00000000) >> 32);
                     break;
             }
@@ -108,11 +110,11 @@ void execute_rtype(Instruction instruction, Processor *processor) {
             switch (instruction.rtype.funct7) {
                 case 0x0:
                     // SRL      
-                    processor->R[rd] = rs1 >> rs2;
+                    processor->R[rd] = processor->R[instruction.rtype.rs1] >> (processor->R[instruction.rtype.rs2] & 0x1F);
                     break;
                 case 0x20:
                     // SRA
-                    processor->R[rd] = (Word) ((sWord) rs1 >> rs2); //possibly will change rd to signed word
+                    processor->R[rd] = (Word) ((sWord) rs1 >> (rs2 & 0x1F)); //possibly will change rd to signed word
                     break;
                 default:
                     handle_invalid_instruction(instruction);
@@ -159,7 +161,7 @@ void execute_itype_except_load(Instruction instruction, Processor *processor) {
             break;
         case 0x1:
             // SLLI
-            processor->R[rd] = rs1 << imm;
+            processor->R[rd] = rs1 << (imm & 0x1F);
             break;
         case 0x2:
             // SLTI
@@ -174,7 +176,7 @@ void execute_itype_except_load(Instruction instruction, Processor *processor) {
             switch (shift0p) {
                 case 0x0:
                     //SRLI
-                    processor->R[rd] = rs1 >> (instruction.itype.imm & 0x1F);
+                    processor->R[rd] = processor->R[instruction.itype.rs1] >> (instruction.itype.imm & 0x1F);
                     break;
                 case 0x1:
                     //SRAI

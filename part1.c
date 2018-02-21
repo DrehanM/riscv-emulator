@@ -244,7 +244,7 @@ void print_itype_except_load(char *name, Instruction instruction, int imm) {
 }
 
 void print_load(char *name, Instruction instruction) {
-    fprintf(stdout, MEM_FORMAT, name, instruction.itype.rd, instruction.itype.imm, instruction.itype.rs1);
+    fprintf(stdout, MEM_FORMAT, name, instruction.itype.rd, sign_extend_number(instruction.itype.imm, 12), instruction.itype.rs1);
 }
 
 void print_store(char *name, Instruction instruction) {
