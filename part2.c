@@ -82,7 +82,7 @@ void execute_rtype(Instruction instruction, Processor *processor) {
                     break;
                 case 0x1:
                     // MULH
-                    processor->R[rd] = (Word) ((Double) ((rs1 * rs2) & 0xFFFFFFFF00000000) >> 32);
+                    processor->R[rd] = (Word) ((((sDouble) rs1 * (sDouble) rs2) & 0xFFFFFFFF00000000) >> 32);
                     break;
             }
             break;
@@ -110,11 +110,11 @@ void execute_rtype(Instruction instruction, Processor *processor) {
             switch (instruction.rtype.funct7) {
                 case 0x0:
                     // SRL      
-                    processor->R[rd] = processor->R[instruction.rtype.rs1] >> (processor->R[instruction.rtype.rs2] & 0x1F);
+                    processor->R[rd] = ((Word) rs1 >> (rs2 & 0x1F));
                     break;
                 case 0x20:
                     // SRA
-                    processor->R[rd] = (Word) ((sWord) rs1 >> (rs2 & 0x1F)); //possibly will change rd to signed word
+                    processor->R[rd] = rs1 >> (rs2 & 0x1F); //possibly will change rd to signed word
                     break;
                 default:
                     handle_invalid_instruction(instruction);
@@ -176,11 +176,11 @@ void execute_itype_except_load(Instruction instruction, Processor *processor) {
             switch (shift0p) {
                 case 0x0:
                     //SRLI
-                    processor->R[rd] = processor->R[instruction.itype.rs1] >> (instruction.itype.imm & 0x1F);
+                    processor->R[rd] = ((Word) rs1) >> (imm & 0x1F);
                     break;
                 case 0x1:
                     //SRAI
-                    processor->R[rd] = (Word) ((sWord) rs1 >> (instruction.itype.imm & 0x1F));
+                    processor->R[rd] = rs1 >> (imm & 0x1F);
                     break;
                 default:
                 handle_invalid_instruction(instruction);
