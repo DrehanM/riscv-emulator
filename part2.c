@@ -260,15 +260,15 @@ void execute_load(Instruction instruction, Processor *processor, Byte *memory) {
     switch (instruction.itype.funct3) {
         case 0x0:
             // LB
-            processor->R[rd] = sign_extend_number(load(memory, rs1 + offset, LENGTH_BYTE), 8);
+            processor->R[rd] = sign_extend_number(load(memory, rs1 + offset, LENGTH_BYTE-1), 8);
             break;
         case 0x1:
             // LH
-            processor->R[rd] = sign_extend_number(load(memory, rs1 + offset, LENGTH_HALF_WORD), 16);
+            processor->R[rd] = sign_extend_number(load(memory, rs1 + offset, LENGTH_HALF_WORD-1), 16);
             break;
         case 0x2:
             // LW
-            processor->R[rd] = load(memory, rs1 + offset, LENGTH_WORD);
+            processor->R[rd] = load(memory, rs1 + offset, LENGTH_WORD-1);
             break;
         default:
             handle_invalid_instruction(instruction);
