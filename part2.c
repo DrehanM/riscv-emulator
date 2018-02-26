@@ -82,7 +82,7 @@ void execute_rtype(Instruction instruction, Processor *processor) {
                     break;
                 case 0x1:
                     // MULH
-                    processor->R[rd] = (Word) ((((sDouble) rs1 * (sDouble) rs2) & 0xFFFFFFFF00000000) >> 32);
+                    processor->R[rd] = (Word) (((Double) ((sDouble) rs1 * (sDouble) rs2)) >> 32);
                     break;
             }
             break;
@@ -301,7 +301,7 @@ void execute_store(Instruction instruction, Processor *processor, Byte *memory) 
 }
 
 void execute_jal(Instruction instruction, Processor *processor) {
-    processor->R[instruction.ujtype.rd] = processor->PC - 4;
+    processor->R[instruction.ujtype.rd] = processor->PC;
     processor->PC += get_jump_offset(instruction) - 4;
 }
 
